@@ -69,6 +69,5 @@ jobs:
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |-
-        for bom in ./*/target/*.cdx.json; do
-          gh release upload "${{ steps.determine-release-tag.outputs.TAG_NAME }}" "$bom" --clobber
-        done
+          gh release upload "${{ steps.determine-release-tag.outputs.TAG_NAME }}" \
+            ./*/target/*.cdx.json --clobber
