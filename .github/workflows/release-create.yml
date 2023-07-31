@@ -46,7 +46,7 @@ jobs:
         
         if [[ "${{ github.event.inputs.releaseVersion }}" != "" ]]; then
           mvn -B release:update-versions \
-            -developmentVersion="${{ github.event.inputs.releaseVersion }}-SNAPSHOT" \
+            -DdevelopmentVersion="${{ github.event.inputs.releaseVersion }}-SNAPSHOT" \
             -DautoVersionSubmodules=true
         fi
         
