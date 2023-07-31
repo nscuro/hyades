@@ -50,7 +50,7 @@ jobs:
         )
         
         mvn -B release:prepare \
-          -DpreparationGoals="clean cyclonedx:makeBom package" \
+          -DpreparationGoals="clean cyclonedx:makeBom verify" \
           -Darguments="${BUILD_ARGS[*]}"
     - name: Determine Release Tag
       id: determine-release-tag
