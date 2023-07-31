@@ -36,7 +36,6 @@ jobs:
       - name: Build and push container images
         run: |-
           ADDITIONAL_TAGS="latest"
-          PROJECT_VERSION=$()
           if mvn help:evaluate -Dexpression=project.version -q -DforceStdout | grep '\-SNAPSHOT$' > /dev/null; then
             ADDITIONAL_TAGS="snapshot"
           fi

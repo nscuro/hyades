@@ -395,6 +395,7 @@
             <arguments>-Dcheckstyle.skip -DskipTests -Dmaven.deploy.skip</arguments>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <projectVersionPolicyId>SemVerVersionPolicy</projectVersionPolicyId>
+            <pushChanges>false</pushChanges>
             <tagNameFormat>v@{project.version}</tagNameFormat>
           </configuration>
         </plugin>
