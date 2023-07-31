@@ -61,7 +61,7 @@ jobs:
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |-
-        gh release create "${{ steps.determine-release-tag.TAG_NAME }}" \
+        gh release create "${{ steps.determine-release-tag.outputs.TAG_NAME }}" \
           --target ${{ github.ref_name }} \
           --verify-tag \
           --generate-notes
@@ -69,4 +69,6 @@ jobs:
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |-
-        gh release upload --clobber "${{ steps.determine-release-tag.TAG_NAME }}" **/*/target/*.cdx.json 
+        gh release upload --clobber \
+          "${{ steps.determine-release-tag.outputs.TAG_NAME }}" \
+          **/*/target/*.cdx.json 
