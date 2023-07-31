@@ -45,9 +45,7 @@ jobs:
         git config user.email "106437498+dependencytrack-bot@users.noreply.github.com"
         
         if [[ "${{ github.event.inputs.releaseVersion }}" != "" ]]; then
-          mvn -B release:update-versions \
-            -DdevelopmentVersion="${{ github.event.inputs.releaseVersion }}-SNAPSHOT" \
-            -DautoVersionSubmodules=true
+          echo "releaseVersion=${{ github.event.inputs.releaseVersion }}" >> release.properties
         fi
         
         if [[ "${{ github.event.inputs.nextDevelopmentVersion }}" != "" ]]; then
