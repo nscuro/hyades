@@ -1,0 +1,67 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    releaseVersion:
+      description: "Version to release (default: current version without `-SNAPSHOT` suffix)"
+      required: false
+      type: string
+    nextDevelopmentVersion:
+      description: "Version to use post release (default: current version with minor bumped by 1)"
+      required: false
+      type: string
+
+permissions: { }
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to create releases
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # tag=v3.5.3
+    - name: Set up JDK
+      uses: actions/setup-java@cd89f46ac9d01407894225f350157564c9c7cee2 # tag=v3.12.0
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Validate Inputs
+      run: |-
+        if [[ "${{ github.event.inputs.releaseVersion }}" != "" && ! "${{ github.event.inputs.releaseVersion }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "::error::The provided release version has an invalid format"
+          exit 1
+        fi
+        if [[ "${{ github.event.inputs.nextDevelopmentVersion }}" != "" && ! "${{ github.event.inputs.nextDevelopmentVersion }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-SNAPSHOT$ ]]; then
+          echo "::error::The provided next development version has an invalid format"
+          exit 1
+        fi
+    - name: Perform Release
+      run: |-
+        git config user.name "dependencytrack-bot"
+        git config user.email "106437498+dependencytrack-bot@users.noreply.github.com"
+        
+        if [[ "${{ github.event.inputs.releaseVersion }}" != "" ]]; then
+          mvn -B release:update-versions \
+            -developmentVersion="${{ github.event.inputs.releaseVersion }}-SNAPSHOT" \
+            -DautoVersionSubmodules=true
+        fi
+        
+        if [[ "${{ github.event.inputs.nextDevelopmentVersion }}" != "" ]]; then
+          echo "developmentVersion=${{ github.event.inputs.nextDevelopmentVersion }}" >> release.properties
+        fi
+        
+        # NOTE: We don't need to run release:perform, because we don't currently
+        # want to publish any artifacts to a Maven repository. release:prepare
+        # does everything we need for the time being.
+        mvn -B release:prepare
+    - name: Create GitHub Release
+      env:
+        GITHUB_TOKEN: "${{ secrets.BOT_RELEASE_TOKEN }}"
+      run: |-
+        gh release create \
+          --target "$(sed -nr 's/^scm.tag=(v[0-9.]+)$/\1/p' release.properties)" \
+          --verify-tag \
+          --generate-notes
