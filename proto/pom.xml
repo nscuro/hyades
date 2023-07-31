@@ -8,6 +8,10 @@
     </parent>
     <artifactId>proto</artifactId>
 
+    <properties>
+        <cyclonedx.skip>true</cyclonedx.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.google.protobuf</groupId>

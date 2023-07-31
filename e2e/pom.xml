@@ -8,6 +8,10 @@
     </parent>
     <artifactId>e2e</artifactId>
 
+    <properties>
+        <cyclonedx.skip>true</cyclonedx.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.quarkus</groupId>

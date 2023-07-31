@@ -32,19 +32,42 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Prepare Release
+    - name: Perform Release
       run: |-
         git config user.name "dependencytrack-bot"
         git config user.email "106437498+dependencytrack-bot@users.noreply.github.com"
-        mvn -B release:prepare -Darguments="-Dcheckstyle.skip -DskipTests -Dmaven.deploy.skip"
-    - name: Perform Release
+        
+        BUILD_ARGS=(
+          '-Dcheckstyle.skip'
+          '-DskipTests'
+          '-Dquarkus.container-image.registry=ghcr.io'
+          "-Dquarkus.container-image.group=${{ github.repository_owner }}"
+          '-Dquarkus.container-image.additional-tags=latest'
+          '-Dquarkus.container-image.build=true'
+          '-Dquarkus.container-image.push=true'
+          '-Dquarkus.docker.buildx.platform=linux/amd64,linux/arm64'
+        )
+        
+        mvn -B release:prepare \
+          -DpreparationGoals="clean cyclonedx:makeBom verify" \
+          -Darguments="${BUILD_ARGS[*]}"
+        # NOTE: Because we don't currently publish any JARs to Maven repositories,
+        # we don't need to run the release:perform goal.
+    - name: Determine Release Tag Name
+      id: determine-release-tag-name
       run: |-
-        mvn -B release:perform -Darguments="-Dcheckstyle.skip -DskipTests -Dmaven.deploy.skip -Dquarkus.container-image.registry=ghcr.io -Dquarkus.container-image.group=${{ github.repository_owner }} -Dquarkus.container-image.additional-tags=latest -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true -Dquarkus.docker.buildx.platform=linux/amd64,linux/arm64"
+        TAG_NAME="$(sed -nr 's/^scm.tag=(v[0-9.]+)$/\1/p' release.properties)"
+        echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |-
-        gh release create "$(sed -nr 's/^scm.tag=(v[0-9.]+)$/\1/p' release.properties)" \
+        gh release create "${{ steps.determine-release-tag-name.tag }}" \
           --target ${{ github.ref_name }} \
           --verify-tag \
           --generate-notes
+    - name: Upload BOMs to GitHub Release
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      run: |-
+        gh release upload --clobber "${{ steps.determine-release-tag-name.tag }}" **/*/target/*.cdx.json 

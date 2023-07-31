@@ -9,6 +9,7 @@
     <artifactId>commons-persistence</artifactId>
 
     <properties>
+        <cyclonedx.skip>true</cyclonedx.skip>
         <project.parentBaseDir>${project.basedir}/..</project.parentBaseDir>
     </properties>
 

@@ -54,6 +54,7 @@
     <lib.log4j-over-slf4j.version>2.0.7</lib.log4j-over-slf4j.version>
 
     <!-- Plugin Versions -->
+    <plugin.cyclonedx.version>2.7.9</plugin.cyclonedx.version>
     <plugin.jacoco.version>0.8.10</plugin.jacoco.version>
     <plugin.protoc-jar.version>3.11.4</plugin.protoc-jar.version>
 
@@ -385,6 +386,17 @@
               </configuration>
             </execution>
           </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.cyclonedx</groupId>
+          <artifactId>cyclonedx-maven-plugin</artifactId>
+          <version>${plugin.cyclonedx.version}</version>
+          <configuration>
+            <outputFormat>json</outputFormat>
+            <outputName>${project.name}-${project.version}.cdx</outputName>
+            <projectType>application</projectType>
+          </configuration>
         </plugin>
 
         <plugin>
