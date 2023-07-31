@@ -35,15 +35,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push container images
         run: |-
-          ADDITIONAL_TAGS="latest"
-          if mvn help:evaluate -Dexpression=project.version -q -DforceStdout | grep '\-SNAPSHOT$' > /dev/null; then
-            ADDITIONAL_TAGS="snapshot"
-          fi
-          
           mvn clean install -DskipTests \
             -Dquarkus.container-image.registry=ghcr.io \
             -Dquarkus.container-image.group=${{ github.repository_owner }} \
-            -Dquarkus.container-image.additional-tags="${ADDITIONAL_TAGS}" \
+            -Dquarkus.container-image.additional-tags=snapshot \
             -Dquarkus.container-image.build=true \
             -Dquarkus.container-image.push=true \
             -Dquarkus.docker.buildx.platform=linux/amd64,linux/arm64
