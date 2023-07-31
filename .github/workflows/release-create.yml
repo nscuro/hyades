@@ -2,14 +2,15 @@ name: Create Release
 
 on:
   workflow_dispatch:
-    releaseVersion:
-      description: "Version to release (default: current version without `-SNAPSHOT` suffix)"
-      required: false
-      type: string
-    nextDevelopmentVersion:
-      description: "Version to use post release (default: current version with minor bumped by 1)"
-      required: false
-      type: string
+    inputs:
+      releaseVersion:
+        description: "Version to release (default: current version without `-SNAPSHOT` suffix)"
+        required: false
+        type: string
+      nextDevelopmentVersion:
+        description: "Version to use post release (default: current version with minor bumped by 1)"
+        required: false
+        type: string
 
 permissions: { }
 
