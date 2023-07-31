@@ -39,7 +39,7 @@ jobs:
           echo "::error::The provided next development version has an invalid format"
           exit 1
         fi
-    - name: Prepare Release
+    - name: Perform Release
       run: |-
         git config user.name "dependencytrack-bot"
         git config user.email "106437498+dependencytrack-bot@users.noreply.github.com"
@@ -53,9 +53,6 @@ jobs:
         fi
         
         mvn -B release:prepare
-    - name: Perform Release
-      run: |-
-        mvn -B release:perform
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
