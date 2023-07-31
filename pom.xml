@@ -392,7 +392,6 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>3.0.1</version>
           <configuration>
-            <arguments>-Dcheckstyle.skip -DskipTests -Dmaven.deploy.skip</arguments>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <projectVersionPolicyId>SemVerVersionPolicy</projectVersionPolicyId>
             <pushChanges>false</pushChanges>

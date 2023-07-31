@@ -14,28 +14,35 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # tag=v3.5.3
-      with:
-        persist-credentials: false
     - name: Set up JDK
       uses: actions/setup-java@cd89f46ac9d01407894225f350157564c9c7cee2 # tag=v3.12.0
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Perform Release
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7 # tag=v2.2.0
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@4c0219f9ac95b02789c1075625400b2acbff50b1 # tag=v2.9.1
+      with:
+        install: true
+    - name: Docker login
+      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # tag=v2.2.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Prepare Release
       run: |-
         git config user.name "dependencytrack-bot"
         git config user.email "106437498+dependencytrack-bot@users.noreply.github.com"
-        mvn -B release:prepare
-    - name: Push Changes
-      uses: ad-m/github-push-action@master
-      with:
-        branch: ${{ github.ref }}
-        github_token: ${{ secrets.BOT_RELEASE_TOKEN }}
-        tags: true
+        mvn -B release:prepare -Darguments="-Dcheckstyle.skip -DskipTests -Dmaven.deploy.skip"
+    - name: Perform Release
+      run: |-
+        mvn -B release:perform -Darguments="-Dcheckstyle.skip -DskipTests -Dmaven.deploy.skip -Dquarkus.container-image.registry=ghcr.io -Dquarkus.container-image.group=${{ github.repository_owner }} -Dquarkus.container-image.additional-tags=latest -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true -Dquarkus.docker.buildx.platform=linux/amd64,linux/arm64"
     - name: Create GitHub Release
       env:
-        GITHUB_TOKEN: "${{ secrets.BOT_RELEASE_TOKEN }}"
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |-
         gh release create "$(sed -nr 's/^scm.tag=(v[0-9.]+)$/\1/p' release.properties)" \
           --target ${{ github.ref_name }} \
