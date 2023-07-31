@@ -33,14 +33,20 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Perform Release
+    - name: Prepare Release
       run: |-
         git config user.name "dependencytrack-bot"
         git config user.email "106437498+dependencytrack-bot@users.noreply.github.com"
         
+        mvn -B release:prepare \
+          -DpreparationGoals="clean cyclonedx:makeBom package" \
+          -Darguments="-Dcheckstyle.skip -DskipTests"
+    - name: Perform Release
+      run: |-
         BUILD_ARGS=(
           '-Dcheckstyle.skip'
           '-DskipTests'
+          '-Dmaven.deploy.skip'
           '-Dquarkus.container-image.registry=ghcr.io'
           "-Dquarkus.container-image.group=${{ github.repository_owner }}"
           '-Dquarkus.container-image.additional-tags=latest'
@@ -49,11 +55,7 @@ jobs:
           '-Dquarkus.docker.buildx.platform=linux/amd64,linux/arm64'
         )
         
-        mvn -B release:prepare \
-          -DpreparationGoals="clean cyclonedx:makeBom verify" \
-          -Darguments="${BUILD_ARGS[*]}"
-        # NOTE: Because we don't currently publish any JARs to Maven repositories,
-        # we don't need to run the release:perform goal.
+        mvn -B release:perform -Darguments="${BUILD_ARGS[*]}"
     - name: Determine Release Tag Name
       id: determine-release-tag-name
       run: |-
