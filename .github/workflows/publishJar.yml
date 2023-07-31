@@ -33,20 +33,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ startsWith(github.repository, 'DependencyTrack/') }}
-      - name: Determine project version
-        id: determine-project-version
-        run: |-
-          PROJECT_VERSION=$(yq -p=xml '.project.version' pom.xml)
-          echo "PROJECT_VERSION=$PROJECT_VERSION" >> $GITHUB_OUTPUT
       - name: Build and push container images
         run: |-
+          ADDITIONAL_TAGS="latest"
+          PROJECT_VERSION=$()
+          if mvn help:evaluate -Dexpression=project.version -q -DforceStdout | grep '\-SNAPSHOT$' > /dev/null; then
+            ADDITIONAL_TAGS="snapshot"
+          fi
+          
           mvn clean install -DskipTests \
             -Dquarkus.container-image.registry=ghcr.io \
-            -Dquarkus.container-image.group=dependencytrack \
-            -Dquarkus.container-image.additional-tags=latest \
+            -Dquarkus.container-image.group=${{ github.repository_owner }} \
+            -Dquarkus.container-image.additional-tags="${ADDITIONAL_TAGS}" \
             -Dquarkus.container-image.build=true \
-            -Dquarkus.container-image.push=${{ startsWith(github.repository, 'DependencyTrack/') }} \
+            -Dquarkus.container-image.push=true \
             -Dquarkus.docker.buildx.platform=linux/amd64,linux/arm64
 
   e2e-test:
