@@ -74,9 +74,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:git@github.com:nscuro/hyades.git</connection>
+    <connection>scm:git:https://github.com/nscuro/hyades.git</connection>
     <url>https://github.com/nscuro/hyades.git</url>
-    <developerConnection>scm:git:git@github.com:nscuro/hyades.git</developerConnection>
+    <developerConnection>scm:git:https://github.com/nscuro//hyades.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
