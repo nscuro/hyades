@@ -38,9 +38,26 @@ jobs:
         git config user.name "dependencytrack-bot"
         git config user.email "106437498+dependencytrack-bot@users.noreply.github.com"
         
+        BUILD_ARGS=(
+          '-Dcheckstyle.skip'
+          '-DskipTests'
+          '-Dmaven.deploy.skip'
+          '-Dquarkus.container-image.registry=ghcr.io'
+          "-Dquarkus.container-image.group=${{ github.repository_owner }}"
+          '-Dquarkus.container-image.additional-tags=latest'
+          '-Dquarkus.container-image.build=true'
+          '-Dquarkus.container-image.push=false'
+          '-Dquarkus.docker.buildx.platform=linux/amd64,linux/arm64'
+        )
+        
         mvn -B release:prepare \
           -DpreparationGoals="clean cyclonedx:makeBom package" \
-          -Darguments="-Dcheckstyle.skip -DskipTests"
+          -Darguments="${BUILD_ARGS[*]}"
+    - name: Determine Release Tag
+      id: determine-release-tag
+      run: |-
+        TAG_NAME="$(sed -nr 's/^scm.tag=(v[0-9.]+)$/\1/p' release.properties)"
+        echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
     - name: Perform Release
       run: |-
         BUILD_ARGS=(
@@ -50,22 +67,17 @@ jobs:
           '-Dquarkus.container-image.registry=ghcr.io'
           "-Dquarkus.container-image.group=${{ github.repository_owner }}"
           '-Dquarkus.container-image.additional-tags=latest'
-          '-Dquarkus.container-image.build=true'
+          '-Dquarkus.container-image.build=false'
           '-Dquarkus.container-image.push=true'
           '-Dquarkus.docker.buildx.platform=linux/amd64,linux/arm64'
         )
         
         mvn -B release:perform -Darguments="${BUILD_ARGS[*]}"
-    - name: Determine Release Tag Name
-      id: determine-release-tag-name
-      run: |-
-        TAG_NAME="$(sed -nr 's/^scm.tag=(v[0-9.]+)$/\1/p' release.properties)"
-        echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |-
-        gh release create "${{ steps.determine-release-tag-name.tag }}" \
+        gh release create "${{ steps.determine-release-tag.tag }}" \
           --target ${{ github.ref_name }} \
           --verify-tag \
           --generate-notes
@@ -73,4 +85,4 @@ jobs:
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |-
-        gh release upload --clobber "${{ steps.determine-release-tag-name.tag }}" **/*/target/*.cdx.json 
+        gh release upload --clobber "${{ steps.determine-release-tag.tag }}" **/*/target/*.cdx.json 
