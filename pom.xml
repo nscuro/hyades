@@ -61,6 +61,11 @@
     <!-- Tool Versions -->
     <tool.protoc.version>com.google.protobuf:protoc:3.21.12</tool.protoc.version>
 
+    <!-- Default SCM Properties -->
+    <scm.connection>scm:git:ssh://git@github.com/DependencyTrack/hyades.git</scm.connection>
+    <scm.developer.connection>scm:git:ssh://git@github.com/DependencyTrack/hyades.git</scm.developer.connection>
+    <scm.url>https://github.com/DependencyTrack/hyades.git</scm.url>
+
     <!-- SonarCloud -->
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.organization>dependency-track</sonar.organization>
@@ -74,9 +79,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:https://github.com/nscuro/hyades.git</connection>
-    <url>https://github.com/nscuro/hyades.git</url>
-    <developerConnection>scm:git:https://github.com/nscuro//hyades.git</developerConnection>
+    <connection>${scm.connection}</connection>
+    <developerConnection>${scm.developer.connection}</developerConnection>
+    <url>${scm.url}</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -452,6 +457,21 @@
       <properties>
         <skipITs>false</skipITs>
         <quarkus.package.type>native</quarkus.package.type>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>github-actions</id>
+      <activation>
+        <property>
+          <name>env.GITHUB_ACTIONS</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <properties>
+        <scm.connection>scm:git:https://github.com/${env.GITHUB_REPOSITORY}.git</scm.connection>
+        <scm.developer.connection>scm:git:https://github.com/${env.GITHUB_REPOSITORY}.git</scm.developer.connection>
+        <scm.url>https://github.com/${env.GITHUB_REPOSITORY}.git</scm.url>
       </properties>
     </profile>
   </profiles>
