@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.hyades</groupId>
   <artifactId>hyades</artifactId>
-  <version>1.14.0-SNAPSHOT</version>
+  <version>1.14.0</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -82,7 +82,7 @@
     <connection>${scm.connection}</connection>
     <developerConnection>${scm.developer.connection}</developerConnection>
     <url>${scm.url}</url>
-    <tag>HEAD</tag>
+    <tag>v1.14.0</tag>
   </scm>
 
   <dependencyManagement>
